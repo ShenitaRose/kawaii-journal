@@ -1,0 +1,70 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&family=Pacifico&display=swap');
+
+:root {
+  --background: #fff5f9;
+  --foreground: #3d2c3e;
+
+  --kawaii-pink: #ffb3d1;
+  --kawaii-pink-light: #ffe4ef;
+  --kawaii-purple: #d4b8ff;
+  --kawaii-purple-light: #f0e8ff;
+  --kawaii-mint: #b8f0e0;
+  --kawaii-yellow: #fff0b3;
+  --kawaii-peach: #ffd4b3;
+  --kawaii-blue: #b3d4ff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-kawaii-pink: var(--kawaii-pink);
+  --color-kawaii-pink-light: var(--kawaii-pink-light);
+  --color-kawaii-purple: var(--kawaii-purple);
+  --color-kawaii-purple-light: var(--kawaii-purple-light);
+  --color-kawaii-mint: var(--kawaii-mint);
+  --color-kawaii-yellow: var(--kawaii-yellow);
+  --color-kawaii-peach: var(--kawaii-peach);
+  --color-kawaii-blue: var(--kawaii-blue);
+  --font-kawaii: 'Nunito', sans-serif;
+  --font-heading: 'Pacifico', cursive;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Nunito', sans-serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--kawaii-pink-light);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--kawaii-pink);
+  border-radius: 10px;
+}
+
+/* Tiptap editor styles */
+.tiptap-editor .ProseMirror {
+  outline: none;
+  min-height: 300px;
+  padding: 1rem;
+  line-height: 1.8;
+}
+
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  color: #c4a0c4;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
