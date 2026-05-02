@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { createClient } from '@/lib/supabase/client'
+import { getEntry, updateEntry } from '@/lib/storage'
 import EntryEditor from '@/components/journal/EntryEditor'
 import StickerPicker from '@/components/stickers/StickerPicker'
 import BeautifyPanel from '@/components/journal/BeautifyPanel'
@@ -28,25 +28,19 @@ export default function EditEntryPage() {
   const [decoration, setDecoration] = useState<EntryDecoration>(DEFAULT_DECORATION)
   const [stickers, setStickers] = useState<StickerPlacement[]>([])
   const [activePanel, setActivePanel] = useState<Panel>(null)
-  const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
-    async function load() {
-      const { data } = await supabase.from('entries').select('*').eq('id', id).single()
-      if (data) {
-        const entry = data as JournalEntry
-        setTitle(entry.title)
-        setContent(entry.content)
-        setDecoration(entry.decoration ?? DEFAULT_DECORATION)
-        setStickers(entry.stickers ?? [])
-      }
-      setLoading(false)
+    const entry = getEntry(id)
+    if (entry) {
+      setTitle(entry.title)
+      setContent(entry.content)
+      setDecoration(entry.decoration ?? DEFAULT_DECORATION)
+      setStickers(entry.stickers ?? [])
     }
-    load()
-  }, [id, supabase])
+    setLoading(false)
+  }, [id])
 
   function handleDecorationChange(partial: Partial<EntryDecoration>) {
     setDecoration(prev => ({ ...prev, ...partial }))
@@ -63,18 +57,9 @@ export default function EditEntryPage() {
     }])
   }
 
-  async function handleSave() {
-    setSaving(true)
-    const { error } = await supabase.from('entries').update({
-      title: title || 'Untitled entry',
-      content,
-      decoration,
-      stickers,
-      updated_at: new Date().toISOString(),
-    }).eq('id', id)
-
-    if (!error) router.push('/journal')
-    else { setSaving(false); alert('Something went wrong 😢') }
+  function handleSave() {
+    updateEntry(id, { title: title || 'Untitled entry', content, decoration, stickers })
+    router.push('/journal')
   }
 
   const washiTop = decoration.washiTape?.find(w => w.position === 'top')
@@ -96,11 +81,11 @@ export default function EditEntryPage() {
         style={{ borderColor: '#ffb3d1' }}>
         <button onClick={() => router.back()} className="text-sm font-bold" style={{ color: '#b89ab8' }}>← Back</button>
         <h1 className="text-xl" style={{ fontFamily: 'Pacifico, cursive', color: '#c96ca3' }}>Edit Entry ✨</h1>
-        <motion.button onClick={handleSave} disabled={saving}
+        <motion.button onClick={handleSave}
           className="px-5 py-1.5 rounded-full text-white font-bold text-sm shadow"
           style={{ background: 'linear-gradient(135deg, #ff8fc2, #c96ca3)' }}
           whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-          {saving ? 'Saving...' : 'Save 🌸'}
+          Save 🌸
         </motion.button>
       </header>
 

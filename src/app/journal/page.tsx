@@ -1,80 +1,36 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { createClient } from '@/lib/supabase/client'
+import { getEntries, deleteEntry } from '@/lib/storage'
 import { JournalEntry } from '@/types'
 
 export default function JournalPage() {
   const [entries, setEntries] = useState<JournalEntry[]>([])
-  const [loading, setLoading] = useState(true)
-  const [userEmail, setUserEmail] = useState('')
-  const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
-      setUserEmail(user.email ?? '')
+    setEntries(getEntries())
+  }, [])
 
-      const { data } = await supabase
-        .from('entries')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      setEntries(data ?? [])
-      setLoading(false)
-    }
-    load()
-  }, [router, supabase])
-
-  async function handleLogout() {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
-  async function handleDelete(id: string) {
-    await supabase.from('entries').delete().eq('id', id)
+  function handleDelete(id: string) {
+    deleteEntry(id)
     setEntries(prev => prev.filter(e => e.id !== id))
   }
 
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
 
-  if (loading) {
-    return (
-      <main className="min-h-screen flex items-center justify-center"
-        style={{ background: 'linear-gradient(135deg, #fff5f9 0%, #f0e8ff 100%)' }}>
-        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}>
-          <span className="text-5xl">🌸</span>
-        </motion.div>
-      </main>
-    )
-  }
-
   return (
     <main className="min-h-screen pb-16" style={{ background: 'linear-gradient(135deg, #fff5f9 0%, #f0e8ff 100%)' }}>
-      {/* Header */}
       <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b-2 px-6 py-3 flex items-center justify-between"
         style={{ borderColor: '#ffb3d1' }}>
         <h1 className="text-2xl" style={{ fontFamily: 'Pacifico, cursive', color: '#c96ca3' }}>
           Kawaii Journal ✨
         </h1>
-        <div className="flex items-center gap-3">
-          <span className="text-sm hidden sm:block" style={{ color: '#b89ab8' }}>{userEmail}</span>
-          <button onClick={handleLogout} className="text-sm font-bold px-3 py-1 rounded-full border-2"
-            style={{ borderColor: '#ffb3d1', color: '#c96ca3' }}>
-            Log out
-          </button>
-        </div>
       </header>
 
       <div className="max-w-4xl mx-auto px-4 pt-8">
-        {/* New entry button */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-2xl font-bold" style={{ color: '#9b6b9b' }}>My Entries</h2>
@@ -92,7 +48,6 @@ export default function JournalPage() {
           </Link>
         </div>
 
-        {/* Entries grid */}
         {entries.length === 0 ? (
           <motion.div className="text-center py-20" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <p className="text-6xl mb-4">📖</p>
