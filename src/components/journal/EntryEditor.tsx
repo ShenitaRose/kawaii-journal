@@ -9,6 +9,7 @@ import { FontFamily } from '@tiptap/extension-font-family'
 import Image from '@tiptap/extension-image'
 import { EntryDecoration } from '@/types'
 import { FONTS } from '@/lib/stickers'
+import { compressImage } from '@/lib/compressImage'
 
 const TEXT_COLORS = [
   '#3d2c3e', '#c96ca3', '#9b6b9b', '#6b6b9b', '#6b9b8a',
@@ -38,17 +39,13 @@ export default function EntryEditor({ content, decoration, onChange, onDecoratio
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   })
 
-  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file || !editor) return
-
-    const reader = new FileReader()
-    reader.onload = () => {
-      editor.chain().focus().setImage({ src: reader.result as string }).run()
-    }
-    reader.readAsDataURL(file)
-    // reset so the same file can be picked again
     e.target.value = ''
+
+    const src = await compressImage(file)
+    editor.chain().focus().setImage({ src }).run()
   }
 
   if (!editor) return null

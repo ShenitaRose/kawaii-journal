@@ -72,9 +72,16 @@ export default function EditEntryPage() {
     setStickers(prev => prev.filter(s => s.id !== id))
   }
 
+  const [saveError, setSaveError] = useState('')
+
   function handleSave() {
-    updateEntry(id, { title: title || 'Untitled entry', content, decoration, stickers })
-    router.push(`/journal/${id}`)
+    try {
+      updateEntry(id, { title: title || 'Untitled entry', content, decoration, stickers })
+      router.push(`/journal/${id}`)
+    } catch {
+      setSaveError('Not enough space! Try using a smaller image 🌸')
+      setTimeout(() => setSaveError(''), 4000)
+    }
   }
 
   const washiTop = decoration.washiTape?.find(w => w.position === 'top')
@@ -143,6 +150,13 @@ export default function EditEntryPage() {
           <p className="text-xs text-center -mt-2" style={{ color: '#c4a0c4' }}>
             Drag stickers to move them · Double-click to remove ✨
           </p>
+        )}
+
+        {saveError && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="text-center text-sm font-bold py-2 px-4 rounded-full bg-red-100 text-red-400">
+            {saveError}
+          </motion.div>
         )}
 
         <div className="flex gap-3">

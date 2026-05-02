@@ -25,7 +25,11 @@ export function saveEntry(entry: Omit<JournalEntry, 'id' | 'user_id' | 'created_
     created_at: now,
     updated_at: now,
   }
-  localStorage.setItem(KEY, JSON.stringify([newEntry, ...entries]))
+  try {
+    localStorage.setItem(KEY, JSON.stringify([newEntry, ...entries]))
+  } catch {
+    throw new Error('storage-full')
+  }
   return newEntry
 }
 
@@ -34,7 +38,11 @@ export function updateEntry(id: string, changes: Partial<Pick<JournalEntry, 'tit
   const updated = entries.map(e =>
     e.id === id ? { ...e, ...changes, updated_at: new Date().toISOString() } : e
   )
-  localStorage.setItem(KEY, JSON.stringify(updated))
+  try {
+    localStorage.setItem(KEY, JSON.stringify(updated))
+  } catch {
+    throw new Error('storage-full')
+  }
 }
 
 export function deleteEntry(id: string): void {
