@@ -55,15 +55,28 @@ body {
 /* Tiptap editor styles */
 .tiptap-editor .ProseMirror {
   outline: none;
-  min-height: 300px;
-  padding: 1rem;
-  line-height: 1.8;
+  min-height: 280px;
+  padding: 1rem 1.25rem 1.5rem;
+  line-height: 1.85;
+  font-size: 1rem;
+}
+
+.tiptap-editor .ProseMirror p {
+  margin-bottom: 0.5rem;
 }
 
 .tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
-  color: #c4a0c4;
-  content: attr(data-placeholder);
+  color: #d4b8d4;
+  content: "Write something lovely today...";
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+.tiptap-editor .ProseMirror strong {
+  font-weight: 700;
+}
+
+.tiptap-editor .ProseMirror em {
+  font-style: italic;
 }

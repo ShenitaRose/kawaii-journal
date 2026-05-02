@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { saveEntry } from '@/lib/storage'
@@ -27,21 +27,35 @@ export default function NewEntryPage() {
   const [decoration, setDecoration] = useState<EntryDecoration>(DEFAULT_DECORATION)
   const [stickers, setStickers] = useState<StickerPlacement[]>([])
   const [activePanel, setActivePanel] = useState<Panel>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+
+  const today = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+  })
 
   function handleDecorationChange(partial: Partial<EntryDecoration>) {
     setDecoration(prev => ({ ...prev, ...partial }))
   }
 
   function handleAddSticker(sticker: Sticker) {
+    if (!cardRef.current) return
+    const rect = cardRef.current.getBoundingClientRect()
     setStickers(prev => [...prev, {
       id: crypto.randomUUID(),
       stickerId: sticker.emoji,
-      x: 20 + Math.random() * 60,
-      y: 20 + Math.random() * 60,
+      // place roughly in the upper area of the card
+      x: 40 + Math.random() * (rect.width - 100),
+      y: 20 + Math.random() * 80,
       scale: 1,
-      rotation: (Math.random() - 0.5) * 30,
+      rotation: (Math.random() - 0.5) * 24,
     }])
+  }
+
+  function moveStickerBy(id: string, dx: number, dy: number) {
+    setStickers(prev => prev.map(s =>
+      s.id === id ? { ...s, x: s.x + dx, y: s.y + dy } : s
+    ))
   }
 
   function handleSave() {
@@ -52,8 +66,9 @@ export default function NewEntryPage() {
   const washiTop = decoration.washiTape?.find(w => w.position === 'top')
 
   return (
-    <main className="min-h-screen pb-20" style={{ background: 'linear-gradient(135deg, #fff5f9 0%, #f0e8ff 100%)' }}>
-      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b-2 px-4 py-3 flex items-center justify-between"
+    <main className="min-h-screen pb-24" style={{ background: 'linear-gradient(135deg, #fff5f9 0%, #f0e8ff 100%)' }}>
+      {/* Header */}
+      <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-sm border-b-2 px-4 py-3 flex items-center justify-between"
         style={{ borderColor: '#ffb3d1' }}>
         <button onClick={() => router.back()} className="text-sm font-bold" style={{ color: '#b89ab8' }}>← Back</button>
         <h1 className="text-xl" style={{ fontFamily: 'Pacifico, cursive', color: '#c96ca3' }}>New Entry ✨</h1>
@@ -68,89 +83,124 @@ export default function NewEntryPage() {
         </motion.button>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 pt-6">
-        <input
-          type="text"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          placeholder="Entry title..."
-          className="w-full text-2xl font-bold bg-transparent border-none outline-none mb-4 placeholder-pink-200"
-          style={{ color: '#3d2c3e', fontFamily: decoration.font }}
-        />
+      <div className="max-w-2xl mx-auto px-4 pt-6 flex flex-col gap-4">
 
-        <div className="relative rounded-2xl border-2 overflow-hidden shadow-md mb-4"
-          style={{ borderColor: decoration.borderColor, background: decoration.background }}>
-
+        {/* Entry card */}
+        <div
+          ref={cardRef}
+          className="relative rounded-2xl border-2 overflow-hidden shadow-lg"
+          style={{ borderColor: decoration.borderColor, background: decoration.background }}
+        >
+          {/* Washi tape strip */}
           {washiTop && washiTop.color !== 'transparent' && (
-            <div className="h-5 w-full opacity-80 flex items-center justify-center" style={{ background: washiTop.color }}>
-              {washiTop.pattern === 'stars' && <span className="text-xs tracking-widest opacity-60">✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦</span>}
-              {washiTop.pattern === 'dots' && <span className="text-xs tracking-widest opacity-60">· · · · · · · · · · · ·</span>}
+            <div className="h-6 w-full flex items-center justify-center overflow-hidden"
+              style={{ background: washiTop.color, opacity: 0.85 }}>
+              <span className="text-xs tracking-[0.3em] opacity-50 select-none">
+                {washiTop.pattern === 'stars' && '✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦'}
+                {washiTop.pattern === 'dots' && '· · · · · · · · · · · · · · · · · · · ·'}
+                {washiTop.pattern === 'check' && '▪ ▫ ▪ ▫ ▪ ▫ ▪ ▫ ▪ ▫ ▪ ▫ ▪ ▫ ▪ ▫ ▪ ▫'}
+                {washiTop.pattern === 'floral' && '❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿'}
+                {washiTop.pattern === 'stripe' && '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'}
+              </span>
             </div>
           )}
 
-          {stickers.length > 0 && (
-            <div className="relative h-0">
-              {stickers.map(s => (
-                <motion.div
-                  key={s.id}
-                  className="absolute cursor-pointer select-none z-10"
-                  style={{ left: `${s.x}%`, top: 8, transform: `rotate(${s.rotation}deg) scale(${s.scale})`, fontSize: '2rem' }}
-                  drag dragMomentum={false}
-                  whileHover={{ scale: s.scale * 1.2 }}
-                  whileTap={{ scale: s.scale * 0.9 }}
-                  onDoubleClick={() => setStickers(prev => prev.filter(st => st.id !== s.id))}
-                  title="Double-click to remove"
-                >
-                  {s.stickerId}
-                </motion.div>
-              ))}
-            </div>
-          )}
+          {/* Sticker overlay — sits above text, full card width */}
+          {stickers.map(s => (
+            <motion.div
+              key={s.id}
+              className="absolute cursor-grab active:cursor-grabbing select-none z-10"
+              style={{
+                left: s.x,
+                top: s.y,
+                fontSize: '2.2rem',
+                rotate: s.rotation,
+                touchAction: 'none',
+              }}
+              drag
+              dragMomentum={false}
+              dragElastic={0}
+              onDragEnd={(_, info) => moveStickerBy(s.id, info.offset.x, info.offset.y)}
+              whileHover={{ scale: 1.2 }}
+              whileTap={{ scale: 0.9 }}
+              onDoubleClick={() => setStickers(prev => prev.filter(st => st.id !== s.id))}
+              title="Drag to move · Double-click to remove"
+            >
+              {s.stickerId}
+            </motion.div>
+          ))}
 
-          <div className="p-2">
-            <EntryEditor
-              content={content}
-              decoration={decoration}
-              onChange={setContent}
-              onDecorationChange={handleDecorationChange}
+          {/* Date + title */}
+          <div className="px-5 pt-4 pb-0">
+            <p className="text-xs font-semibold mb-3 tracking-wide" style={{ color: '#c4a0c4' }}>{today}</p>
+            <input
+              type="text"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              placeholder="Give your entry a title..."
+              className="w-full text-xl font-bold bg-transparent border-none outline-none placeholder-pink-200 mb-1"
+              style={{ color: '#3d2c3e', fontFamily: decoration.font }}
             />
+            <div className="border-b-2 mb-0" style={{ borderColor: decoration.borderColor + '66' }} />
           </div>
+
+          {/* Editor — toolbar + text area */}
+          <EntryEditor
+            content={content}
+            decoration={decoration}
+            onChange={setContent}
+            onDecorationChange={handleDecorationChange}
+          />
         </div>
 
         {stickers.length > 0 && (
-          <p className="text-xs text-center mb-3" style={{ color: '#c4a0c4' }}>Double-click a sticker to remove it ✨</p>
+          <p className="text-xs text-center -mt-2" style={{ color: '#c4a0c4' }}>
+            Drag stickers to move them · Double-click to remove ✨
+          </p>
         )}
 
-        <div className="flex gap-2 mb-4">
+        {/* Panel toggle buttons */}
+        <div className="flex gap-3">
           <motion.button
             onClick={() => setActivePanel(activePanel === 'stickers' ? null : 'stickers')}
-            className={`flex-1 py-2 rounded-full font-bold text-sm border-2 transition-colors ${activePanel === 'stickers' ? 'bg-pink-100' : 'bg-white'}`}
-            style={{ borderColor: '#ffb3d1', color: '#c96ca3' }}
+            className="flex-1 py-2.5 rounded-full font-bold text-sm border-2 transition-colors"
+            style={{
+              borderColor: '#ffb3d1',
+              color: '#c96ca3',
+              background: activePanel === 'stickers' ? '#ffe4ef' : 'white',
+            }}
             whileTap={{ scale: 0.97 }}
           >
             🎀 Stickers
           </motion.button>
           <motion.button
             onClick={() => setActivePanel(activePanel === 'beautify' ? null : 'beautify')}
-            className={`flex-1 py-2 rounded-full font-bold text-sm border-2 transition-colors ${activePanel === 'beautify' ? 'bg-pink-100' : 'bg-white'}`}
-            style={{ borderColor: '#ffb3d1', color: '#c96ca3' }}
+            className="flex-1 py-2.5 rounded-full font-bold text-sm border-2 transition-colors"
+            style={{
+              borderColor: '#ffb3d1',
+              color: '#c96ca3',
+              background: activePanel === 'beautify' ? '#ffe4ef' : 'white',
+            }}
             whileTap={{ scale: 0.97 }}
           >
             ✨ Beautify
           </motion.button>
         </div>
 
+        {/* Slide-in panels */}
         <AnimatePresence>
           {activePanel === 'stickers' && (
-            <motion.div key="stickers" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+            <motion.div key="stickers"
+              initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }}>
               <StickerPicker onSelect={handleAddSticker} />
             </motion.div>
           )}
           {activePanel === 'beautify' && (
-            <motion.div key="beautify" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }}
-              className="overflow-hidden bg-white rounded-2xl border-2 p-4" style={{ borderColor: '#ffb3d1' }}>
+            <motion.div key="beautify"
+              initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }}
+              className="bg-white rounded-2xl border-2 p-5" style={{ borderColor: '#ffb3d1' }}>
               <BeautifyPanel decoration={decoration} onChange={handleDecorationChange} />
             </motion.div>
           )}
