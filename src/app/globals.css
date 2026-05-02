@@ -34,7 +34,8 @@
 }
 
 body {
-  background: var(--background);
+  background: linear-gradient(135deg, #ffb3d1 0%, #ffd4b3 20%, #fff0b3 40%, #b8f0e0 60%, #b3d4ff 80%, #d4b8ff 100%);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: 'Nunito', sans-serif;
 }

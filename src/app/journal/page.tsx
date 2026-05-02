@@ -22,7 +22,7 @@ export default function JournalPage() {
     new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
 
   return (
-    <main className="min-h-screen pb-16" style={{ background: 'linear-gradient(135deg, #fff5f9 0%, #f0e8ff 100%)' }}>
+    <main className="min-h-screen pb-16" >
       <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b-2 px-6 py-3 flex items-center justify-between"
         style={{ borderColor: '#ffb3d1' }}>
         <h1 className="text-2xl" style={{ fontFamily: 'Pacifico, cursive', color: '#c96ca3' }}>

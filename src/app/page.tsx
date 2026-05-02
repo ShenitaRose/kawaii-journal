@@ -7,8 +7,7 @@ const floatingStickers = ['🌸', '⭐', '🍓', '🌈', '🎀', '🍑', '💫',
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4"
-      style={{ background: 'linear-gradient(135deg, #fff5f9 0%, #f0e8ff 50%, #e8f5ff 100%)' }}>
+    <main className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4">
 
       {floatingStickers.map((sticker, i) => (
         <motion.span

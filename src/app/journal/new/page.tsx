@@ -66,7 +66,7 @@ export default function NewEntryPage() {
   const washiTop = decoration.washiTape?.find(w => w.position === 'top')
 
   return (
-    <main className="min-h-screen pb-24" style={{ background: 'linear-gradient(135deg, #fff5f9 0%, #f0e8ff 100%)' }}>
+    <main className="min-h-screen pb-24" >
       {/* Header */}
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-sm border-b-2 px-4 py-3 flex items-center justify-between"
         style={{ borderColor: '#ffb3d1' }}>

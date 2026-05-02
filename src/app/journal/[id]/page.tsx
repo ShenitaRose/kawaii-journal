@@ -80,7 +80,7 @@ export default function EditEntryPage() {
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center"
-        style={{ background: 'linear-gradient(135deg, #fff5f9 0%, #f0e8ff 100%)' }}>
+        >
         <motion.span className="text-5xl" animate={{ rotate: 360 }}
           transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}>🌸</motion.span>
       </main>
@@ -88,7 +88,7 @@ export default function EditEntryPage() {
   }
 
   return (
-    <main className="min-h-screen pb-24" style={{ background: 'linear-gradient(135deg, #fff5f9 0%, #f0e8ff 100%)' }}>
+    <main className="min-h-screen pb-24" >
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-sm border-b-2 px-4 py-3 flex items-center justify-between"
         style={{ borderColor: '#ffb3d1' }}>
         <button onClick={() => router.back()} className="text-sm font-bold" style={{ color: '#b89ab8' }}>← Back</button>
