@@ -47,13 +47,17 @@ function EntryCard({ entry, index, onDelete }: { entry: JournalEntry; index: num
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.92 }}
       transition={{ delay: index * 0.05 }}
-      className="rounded-2xl shadow-md border-2 overflow-hidden group flex flex-col"
+      className="rounded-2xl shadow-md border-2 overflow-hidden group flex flex-col relative cursor-pointer"
       style={{
         background: entry.decoration?.background ?? '#fff',
         borderColor: entry.decoration?.borderColor ?? '#ffb3d1',
         fontFamily: entry.decoration?.font ?? 'Nunito, sans-serif',
       }}
+      whileHover={{ y: -3, boxShadow: '0 8px 30px rgba(201,108,163,0.2)' }}
     >
+      {/* Full-card link */}
+      <Link href={`/journal/${entry.id}`} className="absolute inset-0 z-0" aria-label={entry.title} />
+
       <WashiStrip washiTape={entry.decoration?.washiTape} />
 
       {/* Cover image */}
@@ -67,19 +71,18 @@ function EntryCard({ entry, index, onDelete }: { entry: JournalEntry; index: num
       {/* Card body */}
       <div className="p-4 flex flex-col gap-1 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-bold text-base leading-tight"
-            style={{ color: '#3d2c3e' }}>
+          <h3 className="font-bold text-base leading-tight" style={{ color: '#3d2c3e' }}>
             {entry.title || 'Untitled entry'}
           </h3>
-          {/* Action buttons — visible on hover */}
-          <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Link href={`/journal/${entry.id}`}>
+          {/* Action buttons — above the card link, visible on hover */}
+          <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity relative z-10">
+            <Link href={`/journal/${entry.id}/edit`}>
               <button className="text-xs px-2 py-0.5 rounded-full bg-pink-100 text-pink-500 font-bold hover:bg-pink-200 transition-colors">
                 Edit
               </button>
             </Link>
             <button
-              onClick={() => onDelete(entry.id)}
+              onClick={e => { e.preventDefault(); onDelete(entry.id) }}
               className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-400 font-bold hover:bg-red-200 transition-colors"
             >✕</button>
           </div>

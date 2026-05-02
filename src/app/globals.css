@@ -94,3 +94,23 @@ body {
   outline: 3px solid #ffb3d1;
   border-radius: 12px;
 }
+
+/* Read-only entry content */
+.prose-entry img {
+  max-width: 100%;
+  border-radius: 12px;
+  margin: 0.75rem 0;
+  box-shadow: 0 2px 12px rgba(201, 108, 163, 0.15);
+}
+
+.prose-entry p {
+  margin-bottom: 0.5rem;
+}
+
+.prose-entry strong {
+  font-weight: 700;
+}
+
+.prose-entry em {
+  font-style: italic;
+}
