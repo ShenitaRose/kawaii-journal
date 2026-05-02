@@ -1,10 +1,12 @@
 'use client'
 
+import { useRef } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 import { FontFamily } from '@tiptap/extension-font-family'
+import Image from '@tiptap/extension-image'
 import { EntryDecoration } from '@/types'
 import { FONTS } from '@/lib/stickers'
 
@@ -21,19 +23,40 @@ interface EntryEditorProps {
 }
 
 export default function EntryEditor({ content, decoration, onChange, onDecorationChange }: EntryEditorProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const editor = useEditor({
-    extensions: [StarterKit, TextStyle, Color, FontFamily],
+    extensions: [
+      StarterKit,
+      TextStyle,
+      Color,
+      FontFamily,
+      Image.configure({ inline: false, allowBase64: true }),
+    ],
     content,
     immediatelyRender: false,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   })
+
+  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !editor) return
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      editor.chain().focus().setImage({ src: reader.result as string }).run()
+    }
+    reader.readAsDataURL(file)
+    // reset so the same file can be picked again
+    e.target.value = ''
+  }
 
   if (!editor) return null
 
   return (
     <div className="flex flex-col gap-0">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-1.5 px-4 py-2 bg-white/70 border-b-2 rounded-t-2xl"
+      <div className="flex flex-wrap items-center gap-1.5 px-4 py-2 bg-white/70 border-b-2"
         style={{ borderColor: '#ffe4ef' }}>
 
         <button
@@ -87,13 +110,28 @@ export default function EntryEditor({ content, decoration, onChange, onDecoratio
             />
           ))}
         </div>
+
+        <div className="w-px h-4 bg-pink-200 mx-0.5" />
+
+        {/* Image upload */}
+        <button
+          onMouseDown={e => { e.preventDefault(); fileInputRef.current?.click() }}
+          className="w-7 h-7 rounded-full border-2 border-transparent hover:border-pink-200 transition-colors flex items-center justify-center text-base"
+          title="Add image"
+        >
+          🖼️
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleImageUpload}
+        />
       </div>
 
-      {/* Editable area — no extra wrapper, sits inside the entry card */}
-      <div
-        className="tiptap-editor"
-        style={{ fontFamily: decoration.font, color: decoration.textColor }}
-      >
+      {/* Editable area */}
+      <div className="tiptap-editor" style={{ fontFamily: decoration.font, color: decoration.textColor }}>
         <EditorContent editor={editor} />
       </div>
     </div>
